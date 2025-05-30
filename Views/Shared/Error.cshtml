@@ -1,0 +1,32 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="text-center">
+            <i class="fas fa-exclamation-triangle fa-5x text-warning mb-4"></i>
+            <h1 class="display-4">¡Oops!</h1>
+            <p class="lead text-muted mb-4">
+                Ha ocurrido un error inesperado.
+            </p>
+
+            @if (Model.ShowRequestId)
+            {
+                <p class="text-muted mb-4">
+                    <strong>ID de solicitud:</strong> <code>@Model.RequestId</code>
+                </p>
+            }
+
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Volver al Inicio
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver Atrás
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

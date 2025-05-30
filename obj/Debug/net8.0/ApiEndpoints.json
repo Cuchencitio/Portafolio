@@ -1,0 +1,60 @@
+[
+  {
+    "ContainingType": "TurnitoCL.Controllers.Api.QRApiController",
+    "Method": "ConfirmarAsistencia",
+    "RelativePath": "api/QRApi/confirmar-asistencia",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "TurnitoCL.Controllers.Api.ConfirmarAsistenciaRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TurnitoCL.Controllers.Api.QRApiController",
+    "Method": "GenerarQR",
+    "RelativePath": "api/QRApi/generar/{reservaId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "reservaId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TurnitoCL.Controllers.Api.QRApiController",
+    "Method": "Test",
+    "RelativePath": "api/QRApi/test",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TurnitoCL.Controllers.Api.QRApiController",
+    "Method": "VerificarQR",
+    "RelativePath": "api/QRApi/verificar/{codigo}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "codigo",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

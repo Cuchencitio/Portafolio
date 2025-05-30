@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36121.58 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurnitoCL", "TurnitoCL.csproj", "{A16707D4-8879-44AC-B005-2549D12B86C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A16707D4-8879-44AC-B005-2549D12B86C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A16707D4-8879-44AC-B005-2549D12B86C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A16707D4-8879-44AC-B005-2549D12B86C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A16707D4-8879-44AC-B005-2549D12B86C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DF7B1E30-7201-434E-BEB8-D1DA90F5B450}
+	EndGlobalSection
+EndGlobal

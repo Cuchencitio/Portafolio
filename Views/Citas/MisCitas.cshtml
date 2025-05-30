@@ -1,0 +1,335 @@
+﻿@model TurnitoCL.ViewModels.MisCitasViewModel
+@{
+    ViewData["Title"] = "Mis Citas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-calendar-alt me-2"></i>Mis Citas</h1>
+        <p class="text-muted">Gestiona todas tus citas agendadas</p>
+    </div>
+    <div>
+        <a asp-action="Agendar" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nueva Cita
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas rápidas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalProximas</h4>
+                        <p class="mb-0">Próximas Citas</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-check fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalCompletadas</h4>
+                        <p class="mb-0">Completadas</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalCanceladas</h4>
+                        <p class="mb-0">Canceladas</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs para organizar las citas -->
+<ul class="nav nav-tabs" id="citasTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="proximas-tab" data-bs-toggle="tab" data-bs-target="#proximas" type="button" role="tab">
+            <i class="fas fa-calendar-check me-2"></i>Próximas Citas
+            @if (Model.TotalProximas > 0)
+            {
+                <span class="badge bg-primary ms-2">@Model.TotalProximas</span>
+            }
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="completadas-tab" data-bs-toggle="tab" data-bs-target="#completadas" type="button" role="tab">
+            <i class="fas fa-history me-2"></i>Historial
+            @if (Model.TotalCompletadas > 0)
+            {
+                <span class="badge bg-success ms-2">@Model.TotalCompletadas</span>
+            }
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="canceladas-tab" data-bs-toggle="tab" data-bs-target="#canceladas" type="button" role="tab">
+            <i class="fas fa-times-circle me-2"></i>Canceladas
+            @if (Model.TotalCanceladas > 0)
+            {
+                <span class="badge bg-warning ms-2">@Model.TotalCanceladas</span>
+            }
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="citasTabContent">
+    <!-- Próximas Citas -->
+    <div class="tab-pane fade show active" id="proximas" role="tabpanel">
+        <div class="mt-4">
+            @if (Model.ProximasCitas.Any())
+            {
+                @foreach (var cita in Model.ProximasCitas)
+                {
+                    <div class="card mb-3 border-start border-primary border-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-cut fa-2x text-primary me-3"></i>
+                                        <div>
+                                            <h5 class="mb-1">@cita.Servicio.Nombre</h5>
+                                            <h6 class="text-muted mb-0">@cita.Proveedor.NombreNegocio</h6>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-muted">
+                                        <div class="col-sm-6">
+                                            <p class="mb-1">
+                                                <i class="fas fa-calendar me-2"></i>@cita.FechaFormateada
+                                            </p>
+                                            <p class="mb-1">
+                                                <i class="fas fa-clock me-2"></i>@cita.Servicio.DuracionFormateada
+                                            </p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="mb-1">
+                                                <i class="fas fa-dollar-sign me-2"></i>@cita.Servicio.PrecioFormateado
+                                            </p>
+                                            <p class="mb-1">
+                                                <i class="fas fa-map-marker-alt me-2"></i>@cita.Proveedor.Direccion
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(cita.Observaciones))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-comment me-1"></i><strong>Observaciones:</strong> @cita.Observaciones
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="col-md-4 text-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-@cita.EstadoColor fs-6">@cita.Estado</span>
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-2">
+                                        <a asp-action="Detalle" asp-route-id="@cita.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                                        </a>
+
+                                        @if (cita.PuedeSerCancelada)
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="confirmarCancelacion(@cita.Id, '@cita.Servicio.Nombre', '@cita.FechaFormateada')">
+                                                <i class="fas fa-times me-1"></i>Cancelar
+                                            </button>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(cita.CodigoQR))
+                                        {
+                                            <small class="text-success">
+                                                <i class="fas fa-qrcode me-1"></i>QR Disponible
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-plus fa-4x text-muted mb-3"></i>
+                    <h4>No tienes citas próximas</h4>
+                    <p class="text-muted mb-4">¡Es un buen momento para agendar una nueva cita!</p>
+                    <a asp-action="Agendar" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Agendar Primera Cita
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Historial de Citas -->
+    <div class="tab-pane fade" id="completadas" role="tabpanel">
+        <div class="mt-4">
+            @if (Model.CitasCompletadas.Any())
+            {
+                @foreach (var cita in Model.CitasCompletadas)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+                                        <div>
+                                            <h6 class="mb-1">@cita.Servicio.Nombre</h6>
+                                            <small class="text-muted">@cita.Proveedor.NombreNegocio</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-muted small">
+                                        <div class="col-sm-6">
+                                            <p class="mb-1">
+                                                <i class="fas fa-calendar me-1"></i>@cita.FechaFormateada
+                                            </p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="mb-1">
+                                                <i class="fas fa-dollar-sign me-1"></i>@cita.Servicio.PrecioFormateado
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-@cita.EstadoColor mb-2">@cita.Estado</span><br>
+                                    <a asp-action="Detalle" asp-route-id="@cita.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Ver Detalle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-4x text-muted mb-3"></i>
+                    <h4>Sin historial de citas</h4>
+                    <p class="text-muted">Aquí aparecerán tus citas completadas</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Citas Canceladas -->
+    <div class="tab-pane fade" id="canceladas" role="tabpanel">
+        <div class="mt-4">
+            @if (Model.CitasCanceladas.Any())
+            {
+                @foreach (var cita in Model.CitasCanceladas)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-times-circle fa-2x text-danger me-3"></i>
+                                        <div>
+                                            <h6 class="mb-1">@cita.Servicio.Nombre</h6>
+                                            <small class="text-muted">@cita.Proveedor.NombreNegocio</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-muted small">
+                                        <p class="mb-1">
+                                            <i class="fas fa-calendar me-1"></i>@cita.FechaFormateada
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-@cita.EstadoColor">@cita.Estado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-smile fa-4x text-success mb-3"></i>
+                    <h4>¡Perfecto!</h4>
+                    <p class="text-muted">No has cancelado ninguna cita</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para cancelar -->
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirmar Cancelación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas cancelar la siguiente cita?</p>
+                <div class="alert alert-info">
+                    <strong id="servicioACancelar"></strong><br>
+                    <span id="fechaACancelar"></span>
+                </div>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>No, mantener cita
+                </button>
+                <form id="formCancelar" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check me-2"></i>Sí, cancelar cita
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarCancelacion(citaId, servicio, fecha) {
+            $('#servicioACancelar').text(servicio);
+            $('#fechaACancelar').text(fecha);
+            $('#formCancelar').attr('action', '@Url.Action("Cancelar", "Citas")/' + citaId);
+            $('#cancelarModal').modal('show');
+        }
+    </script>
+}

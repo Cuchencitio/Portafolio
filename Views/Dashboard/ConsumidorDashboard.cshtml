@@ -1,0 +1,216 @@
+﻿@model TurnitoCL.Controllers.ConsumidorDashboardViewModel
+@{
+    ViewData["Title"] = "Mi Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-tachometer-alt me-2"></i>Mi Dashboard</h1>
+        <p class="text-muted">Bienvenido, <strong>@Model.Usuario.NombreCompleto</strong></p>
+    </div>
+    <div>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("Agendar", "Citas")'">
+            <i class="fas fa-plus me-2"></i>Agendar Nueva Cita
+        </button>
+    </div>
+</div>
+
+<!-- Tarjetas de estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalReservas</h4>
+                        <p class="mb-0">Total de Citas</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.ReservasPendientes</h4>
+                        <p class="mb-0">Citas Pendientes</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.ProximasReservas.Count</h4>
+                        <p class="mb-0">Próximas Citas</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-check fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Próximas Citas -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-check me-2"></i>Próximas Citas
+                </h5>
+                <span class="badge bg-primary">@Model.ProximasReservas.Count</span>
+            </div>
+            <div class="card-body">
+                @if (Model.ProximasReservas.Any())
+                {
+                    @foreach (var reserva in Model.ProximasReservas)
+                    {
+                        <div class="card mb-3 border-start border-primary border-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">@reserva.Servicio.Nombre</h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-store me-1"></i>@reserva.Proveedor.NombreNegocio
+                                        </p>
+                                        <p class="mb-1">
+                                            <i class="fas fa-calendar me-1"></i>@reserva.FechaFormateada
+                                        </p>
+                                        <p class="mb-0 text-muted">
+                                            <i class="fas fa-dollar-sign me-1"></i>@reserva.Servicio.PrecioFormateado
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-@reserva.EstadoColor">@reserva.Estado</span>
+                                        @if (reserva.PuedeSerCancelada)
+                                        {
+                                            <br>
+                                
+                                            <small><a href="#" class="text-danger">Cancelar</a></small>
+                                        }
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(reserva.CodigoQR))
+                                {
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-qrcode me-1"></i>Código QR generado
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-plus fa-3x mb-3"></i>
+                        <p>No tienes citas próximas</p>
+                        <button class="btn btn-primary" onclick="location.href='@Url.Action("Agendar", "Citas")'">
+                            <i class="fas fa-plus me-2"></i>Agendar Primera Cita
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Citas -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Historial de Citas
+                </h5>
+                <span class="badge bg-secondary">@Model.HistorialReservas.Count</span>
+            </div>
+            <div class="card-body">
+                @if (Model.HistorialReservas.Any())
+                {
+                    @foreach (var reserva in Model.HistorialReservas)
+                    {
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <strong>@reserva.FechaFormateada</strong><br>
+                                <span>@reserva.Servicio.Nombre</span><br>
+                                <small class="text-muted">@reserva.Proveedor.NombreNegocio</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-@reserva.EstadoColor">@reserva.Estado</span><br>
+                                <small class="text-muted">@reserva.Servicio.PrecioFormateado</small>
+                            </div>
+                        </div>
+                    }
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>Ver Todo el Historial
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-history fa-3x mb-3"></i>
+                        <p>Aún no tienes historial de citas</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("Agendar", "Citas")" class="btn btn-outline-primary w-100 text-decoration-none">
+                            <i class="fas fa-plus fa-2x d-block mb-2"></i>
+                            Agendar Cita
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-success w-100">
+                            <i class="fas fa-search fa-2x d-block mb-2"></i>
+                            Buscar Servicios
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-info w-100">
+                            <i class="fas fa-user fa-2x d-block mb-2"></i>
+                            Mi Perfil
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="@Url.Action("MisCitas", "Citas")" class="btn btn-outline-warning w-100 text-decoration-none">
+                            <i class="fas fa-history fa-2x d-block mb-2"></i>
+                            Mis Citas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

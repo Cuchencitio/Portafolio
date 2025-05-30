@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TurnitoCL</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TurnitoCL.styles.css" asp-append-version="true" />
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-cut me-2"></i>TurnitoCL
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-1"></i>@User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu">
+                                    @if (User.HasClaim("Rol", "Proveedor"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard Proveedor</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cogs me-2"></i>Mis Servicios</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Disponibilidad</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Citas" asp-action="Agendar"><i class="fas fa-plus me-2"></i>Agendar Cita</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Citas" asp-action="MisCitas"><i class="fas fa-history me-2"></i>Mis Citas</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-primary text-white ms-2 px-3" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus me-1"></i>Registrarse
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" style="min-height: 70vh; padding-bottom: 3rem;">
+            <!-- Mensajes de éxito/error -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="bg-light border-top mt-5">
+        <div class="container">
+            <div class="row py-4">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-cut me-2"></i>TurnitoCL</h5>
+                    <p class="text-muted">Tu plataforma de agendamiento de servicios de peluquería en Chile.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Enlaces</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted text-decoration-none">Términos y Condiciones</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Política de Privacidad</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Síguenos</h6>
+                    <div>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-twitter fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 - TurnitoCL - Todos los derechos reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

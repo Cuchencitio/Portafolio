@@ -1,0 +1,303 @@
+﻿@model TurnitoCL.ViewModels.AgendarCitaViewModel
+@{
+    ViewData["Title"] = "Agendar Cita";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-plus me-2"></i>Agendar Nueva Cita
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Agendar" method="post" id="agendarForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Selección de Proveedor -->
+                    <div class="mb-4">
+                        <label asp-for="ProveedorId" class="form-label fw-bold">
+                            <i class="fas fa-store me-2"></i>Selecciona un Proveedor
+                        </label>
+                        <select asp-for="ProveedorId" class="form-select" id="proveedorSelect">
+                            <option value="">-- Selecciona un proveedor --</option>
+                            @foreach (var proveedor in Model.Proveedores)
+                            {
+                                <option value="@proveedor.Id"
+                                        data-negocio="@proveedor.NombreNegocio"
+                                        data-direccion="@proveedor.Direccion">
+                                    @proveedor.NombreNegocio - @proveedor.Usuario.NombreCompleto
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProveedorId" class="text-danger"></span>
+
+                        <!-- Debug info -->
+                        <small class="text-muted">
+                            Debug: Total proveedores = @Model.Proveedores.Count
+                        </small>
+                    </div>
+
+                    <!-- Información del Proveedor -->
+                    <div id="infoProveedor" class="mb-4" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6 id="nombreNegocio"></h6>
+                            <p class="mb-0" id="direccionNegocio"></p>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Servicio -->
+                    <div class="mb-4">
+                        <label asp-for="ServicioId" class="form-label fw-bold">
+                            <i class="fas fa-cut me-2"></i>Selecciona un Servicio
+                        </label>
+                        <select asp-for="ServicioId" class="form-select" id="servicioSelect" disabled>
+                            <option value="">-- Primero selecciona un proveedor --</option>
+                        </select>
+                        <span asp-validation-for="ServicioId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Información del Servicio -->
+                    <div id="infoServicio" class="mb-4" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 id="nombreServicio"></h6>
+                                        <p id="descripcionServicio" class="text-muted mb-0"></p>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <h5 class="text-primary" id="precioServicio"></h5>
+                                        <small class="text-muted" id="duracionServicio"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selección de Fecha -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Fecha" class="form-label fw-bold">
+                                <i class="fas fa-calendar me-2"></i>Fecha
+                            </label>
+                            <input asp-for="Fecha" class="form-control" type="date" id="fechaInput"
+                                   min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="Fecha" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Hora" class="form-label fw-bold">
+                                <i class="fas fa-clock me-2"></i>Hora
+                            </label>
+                            <select asp-for="Hora" class="form-select" id="horaSelect" disabled>
+                                <option value="">-- Selecciona fecha y servicio --</option>
+                            </select>
+                            <span asp-validation-for="Hora" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="mb-4">
+                        <label asp-for="Observaciones" class="form-label">
+                            <i class="fas fa-comment me-2"></i>Observaciones (Opcional)
+                        </label>
+                        <textarea asp-for="Observaciones" class="form-control" rows="3"
+                                  placeholder="Alguna observación especial para tu cita..."></textarea>
+                        <span asp-validation-for="Observaciones" class="text-danger"></span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="btnAgendar" disabled>
+                            <i class="fas fa-calendar-check me-2"></i>Agendar Cita
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel lateral con información -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Información
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-clock me-2"></i>Horarios</h6>
+                    <p class="text-muted small">
+                        Los horarios disponibles se muestran según la disponibilidad del proveedor seleccionado.
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-calendar-times me-2"></i>Cancelaciones</h6>
+                    <p class="text-muted small">
+                        Puedes cancelar tu cita hasta 2 horas antes del horario programado.
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-qrcode me-2"></i>Código QR</h6>
+                    <p class="text-muted small">
+                        Recibirás un código QR único para confirmar tu asistencia el día de la cita.
+                    </p>
+                </div>
+
+                <div class="alert alert-warning">
+                    <small>
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Confirma todos los detalles antes de agendar.
+                        La cita se considera confirmada una vez completado el proceso.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Variables
+            let serviciosData = {};
+
+            // Manejar cambio de proveedor
+            $('#proveedorSelect').change(function() {
+                const proveedorId = $(this).val();
+                const selectedOption = $(this).find('option:selected');
+
+                console.log('Proveedor seleccionado - ID:', proveedorId);
+                console.log('Opción seleccionada:', selectedOption);
+                console.log('Valor del select:', $(this).val());
+                console.log('Texto de la opción:', selectedOption.text());
+
+                if (proveedorId && proveedorId !== '') {
+                    // Mostrar información del proveedor
+                    $('#nombreNegocio').text(selectedOption.data('negocio'));
+                    $('#direccionNegocio').text(selectedOption.data('direccion'));
+                    $('#infoProveedor').slideDown();
+
+                    // Cargar servicios
+                    cargarServicios(proveedorId);
+                    $('#servicioSelect').prop('disabled', false);
+                } else {
+                    console.log('ProveedorId está vacío o es falsy');
+                    $('#infoProveedor').slideUp();
+                    $('#infoServicio').slideUp();
+                    $('#servicioSelect').prop('disabled', true).html('<option value="">-- Primero selecciona un proveedor --</option>');
+                    resetearFormulario();
+                }
+            });
+
+            // Manejar cambio de servicio
+            $('#servicioSelect').change(function() {
+                const servicioId = $(this).val();
+
+                if (servicioId && serviciosData[servicioId]) {
+                    const servicio = serviciosData[servicioId];
+                    $('#nombreServicio').text(servicio.nombre);
+                    $('#descripcionServicio').text(servicio.descripcion || 'Sin descripción');
+                    $('#precioServicio').text('$' + servicio.precio.toLocaleString());
+                    $('#duracionServicio').text(servicio.duracion + ' minutos');
+                    $('#infoServicio').slideDown();
+
+                    cargarHorarios();
+                } else {
+                    $('#infoServicio').slideUp();
+                    $('#horaSelect').prop('disabled', true).html('<option value="">-- Selecciona un servicio --</option>');
+                    $('#btnAgendar').prop('disabled', true);
+                }
+            });
+
+            // Manejar cambio de fecha
+            $('#fechaInput').change(function() {
+                cargarHorarios();
+            });
+
+            // Manejar cambio de hora
+            $('#horaSelect').change(function() {
+                const hora = $(this).val();
+                $('#btnAgendar').prop('disabled', !hora);
+            });
+
+            // Funciones auxiliares
+            function cargarServicios(proveedorId) {
+                console.log('Cargando servicios para proveedor:', proveedorId);
+
+                $.get('/Citas/GetServicios/' + proveedorId)
+                    .done(function(data) {
+                        console.log('Servicios recibidos:', data);
+                        serviciosData = {};
+                        let options = '<option value="">-- Selecciona un servicio --</option>';
+
+                        data.forEach(function(servicio) {
+                            serviciosData[servicio.id] = servicio;
+                            options += `<option value="${servicio.id}">${servicio.nombre} - ${servicio.precio.toLocaleString()}</option>`;
+                        });
+
+                        $('#servicioSelect').html(options);
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.error('Error al cargar servicios:', error);
+                        console.error('Status:', status);
+                        console.error('Response:', xhr.responseText);
+                        alert('Error al cargar los servicios: ' + error);
+                    });
+            }
+
+            function cargarHorarios() {
+                const proveedorId = $('#proveedorSelect').val();
+                const servicioId = $('#servicioSelect').val();
+                const fecha = $('#fechaInput').val();
+
+                console.log('Cargando horarios:', { proveedorId, servicioId, fecha });
+
+                if (proveedorId && servicioId && fecha) {
+                    $('#horaSelect').prop('disabled', true).html('<option value="">Cargando...</option>');
+
+                    $.get('/Citas/GetHorasDisponibles', {
+                        proveedorId: proveedorId,
+                        servicioId: servicioId,
+                        fecha: fecha
+                    })
+                    .done(function(data) {
+                        console.log('Horarios recibidos:', data);
+                        let options = '<option value="">-- Selecciona una hora --</option>';
+
+                        if (data.length > 0) {
+                            data.forEach(function(hora) {
+                                options += `<option value="${hora.valor}">${hora.texto}</option>`;
+                            });
+                        } else {
+                            options = '<option value="">No hay horarios disponibles</option>';
+                        }
+
+                        $('#horaSelect').html(options).prop('disabled', false);
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.error('Error al cargar horarios:', error);
+                        $('#horaSelect').html('<option value="">Error al cargar horarios</option>');
+                    });
+                }
+            }
+
+            function resetearFormulario() {
+                $('#ServicioId').val('');
+                $('#Hora').val('');
+                $('#btnAgendar').prop('disabled', true);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,321 @@
+﻿@model TurnitoCL.ViewModels.DetalleReservaViewModel
+@{
+    ViewData["Title"] = "Detalle de Cita";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Información principal de la cita -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-check me-2"></i>Detalle de la Cita
+                </h4>
+                <span class="badge bg-@Model.Reserva.EstadoColor fs-6">@Model.Reserva.Estado</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Información del servicio -->
+                        <div class="mb-4">
+                            <h5 class="text-primary">
+                                <i class="fas fa-cut me-2"></i>@Model.Reserva.Servicio.Nombre
+                            </h5>
+                            <p class="text-muted">@Model.Reserva.Servicio.Descripcion</p>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Precio:</strong><br>
+                                    <span class="text-success fs-5">@Model.Reserva.Servicio.PrecioFormateado</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Duración:</strong><br>
+                                    <span class="text-info">@Model.Reserva.Servicio.DuracionFormateada</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del proveedor -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-store me-2"></i>Proveedor</h6>
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="mb-1">@Model.Reserva.Proveedor.NombreNegocio</h6>
+                                <p class="mb-1">@Model.Reserva.Proveedor.Usuario.NombreCompleto</p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@Model.Reserva.Proveedor.Direccion
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <!-- Información de fecha y hora -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-calendar me-2"></i>Fecha y Hora</h6>
+                            <div class="bg-primary text-white p-3 rounded text-center">
+                                <h4 class="mb-1">@Model.Reserva.FechaHora.ToString("dd/MM/yyyy")</h4>
+                                <h3 class="mb-0">@Model.Reserva.FechaHora.ToString("HH:mm")</h3>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        @if (!string.IsNullOrEmpty(Model.Reserva.Observaciones))
+                        {
+                            <div class="mb-4">
+                                <h6><i class="fas fa-comment me-2"></i>Observaciones</h6>
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-0">@Model.Reserva.Observaciones</p>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Información de creación -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-info-circle me-2"></i>Información de la Reserva</h6>
+                            <small class="text-muted">
+                                <strong>ID:</strong> #@Model.Reserva.Id<br>
+                                <strong>Creada:</strong> @Model.Reserva.FechaCreacion.ToString("dd/MM/yyyy HH:mm")<br>
+                                @if (Model.Reserva.FechaModificacion != Model.Reserva.FechaCreacion)
+                                {
+                                    <strong>Modificada:</strong> 
+                                    @Model.Reserva.FechaModificacion.ToString("dd/MM/yyyy HH:mm")
+                                
+                                    <br>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.Reserva.CodigoQR))
+                                {
+                                    <strong>Código QR:</strong> 
+                                    @Model.Reserva.CodigoQR
+                                
+                                    <br>
+                                }
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="MisCitas" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a Mis Citas
+                        </a>
+
+                        <div class="d-flex gap-2">
+                            @if (Model.Reserva.PuedeSerCancelada)
+                            {
+                                <button type="button" class="btn btn-outline-danger"
+                                        onclick="confirmarCancelacion(@Model.Reserva.Id, '@Model.Reserva.Servicio.Nombre', '@Model.Reserva.FechaFormateada')">
+                                    <i class="fas fa-times me-2"></i>Cancelar Cita
+                                </button>
+                            }
+
+                            @if (Model.PuedeGenerarQR && !string.IsNullOrEmpty(Model.Reserva.CodigoQR))
+                            {
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#qrModal">
+                                    <i class="fas fa-qrcode me-2"></i>Ver Código QR
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de asistencias -->
+        @if (Model.HistorialAsistencias.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Historial de Asistencias
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var asistencia in Model.HistorialAsistencias)
+                    {
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <strong>Asistencia Confirmada</strong><br>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>@asistencia.FechaEscaneoFormateada<br>
+                                    <i class="fas fa-qrcode me-1"></i>Método: @asistencia.MetodoRegistro
+                                    @if (!string.IsNullOrEmpty(asistencia.Observaciones))
+                                    {
+                                        <br>
+                                        <i class="fas fa-comment me-1"></i>
+
+                                        @asistencia.Observaciones
+                                    }
+                                </small>
+                            </div>
+                            <div>
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Panel lateral -->
+    <div class="col-md-4">
+        <!-- Código QR -->
+        @if (Model.PuedeGenerarQR && !string.IsNullOrEmpty(Model.QRCodeUrl))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-qrcode me-2"></i>Código QR
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="@Model.QRCodeUrl" alt="Código QR" class="img-fluid mb-3" style="max-width: 200px;">
+                    <p class="text-muted small">
+                        Presenta este código QR el día de tu cita para confirmar tu asistencia.
+                    </p>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">
+                        <i class="fas fa-expand me-2"></i>Ver Más Grande
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Información importante -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Información Importante
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Reserva.Estado == "Pendiente")
+                {
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="fas fa-clock me-2"></i>
+                            Tu cita está <strong>confirmada</strong>. Recuerda llegar puntual.
+                        </small>
+                    </div>
+                }
+
+                @if (Model.Reserva.PuedeSerCancelada)
+                {
+                    <div class="alert alert-warning">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Puedes cancelar esta cita hasta 2 horas antes del horario programado.
+                        </small>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Reserva.CodigoQR))
+                {
+                    <div class="alert alert-success">
+                        <small>
+                            <i class="fas fa-qrcode me-2"></i>
+                            Tu código QR está listo. Preséntalo el día de tu cita.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Contacto del proveedor -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-phone me-2"></i>Contacto
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>@Model.Reserva.Proveedor.NombreNegocio</h6>
+                @if (!string.IsNullOrEmpty(Model.Reserva.Proveedor.Usuario.Telefono))
+                {
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2"></i>
+                        <a href="tel:@Model.Reserva.Proveedor.Usuario.Telefono" class="text-decoration-none">
+                            @Model.Reserva.Proveedor.Usuario.Telefono
+                        </a>
+                    </p>
+                }
+                <p class="mb-0">
+                    <i class="fas fa-envelope me-2"></i>
+                    <a href="mailto:@Model.Reserva.Proveedor.Usuario.Email" class="text-decoration-none">
+                        @Model.Reserva.Proveedor.Usuario.Email
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar QR más grande -->
+@if (Model.PuedeGenerarQR && !string.IsNullOrEmpty(Model.QRCodeUrl))
+{
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-qrcode me-2"></i>Código QR - Cita #@Model.Reserva.Id
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="@Model.QRCodeUrl" alt="Código QR" class="img-fluid mb-3">
+                    <h6>@Model.Reserva.Servicio.Nombre</h6>
+                    <p class="text-muted">@Model.Reserva.FechaFormateada</p>
+                    <p class="text-muted small">
+                        Presenta este código QR en @Model.Reserva.Proveedor.NombreNegocio
+                        para confirmar tu asistencia.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal de confirmación para cancelar -->
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirmar Cancelación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas cancelar esta cita?</p>
+                <div class="alert alert-info">
+                    <strong id="servicioACancelar">@Model.Reserva.Servicio.Nombre</strong><br>
+                    <span id="fechaACancelar">@Model.Reserva.FechaFormateada</span>
+                </div>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>No, mantener cita
+                </button>
+                <form asp-action="Cancelar" asp-route-id="@Model.Reserva.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check me-2"></i>Sí, cancelar cita
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarCancelacion(citaId, servicio, fecha) {
+            $('#servicioACancelar').text(servicio);
+            $('#fechaACancelar').text(fecha);
+            $('#cancelarModal').modal('show');
+        }
+    </script>
+}
