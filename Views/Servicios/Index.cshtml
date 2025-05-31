@@ -1,0 +1,287 @@
+﻿@model TurnitoCL.ViewModels.GestionServiciosViewModel
+@{
+    ViewData["Title"] = "Gestión de Servicios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-cogs me-2"></i>Gestión de Servicios</h1>
+        <p class="text-muted">Administra los servicios de <strong>@Model.Proveedor.NombreNegocio</strong></p>
+    </div>
+    <div>
+        <a asp-controller="Servicios" asp-action="Crear" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nuevo Servicio
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas de servicios -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalServicios</h4>
+                        <p class="mb-0">Total Servicios</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-cut fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.ServiciosActivos</h4>
+                        <p class="mb-0">Activos</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.ServiciosInactivos</h4>
+                        <p class="mb-0">Inactivos</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@((Model.TotalServicios > 0 ? Model.Servicios.Average(s => s.Precio) : 0).ToString("C0"))</h4>
+                        <p class="mb-0">Precio Promedio</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de servicios -->
+@if (Model.Servicios.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Tus Servicios
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Precio</th>
+                            <th>Duración</th>
+                            <th>Estado</th>
+                            <th>Creado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var servicio in Model.Servicios)
+                        {
+                            <tr class="@(servicio.Activo ? "" : "table-secondary")">
+                                <td>
+                                    <div>
+                                        <strong>@servicio.Nombre</strong>
+                                        @if (!string.IsNullOrEmpty(servicio.Descripcion))
+                                        {
+                                            <br>
+
+                                            <small class="text-muted">@servicio.Descripcion</small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fs-5 text-success fw-bold">@servicio.PrecioFormateado</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@servicio.DuracionFormateada</span>
+                                </td>
+                                <td>
+                                    @if (servicio.Activo)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-times me-1"></i>Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <small class="text-muted">@servicio.FechaCreacion.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Detalle" asp-route-id="@servicio.Id"
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="Ver detalle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Editar" asp-route-id="@servicio.Id"
+                                           class="btn btn-outline-warning btn-sm"
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-@(servicio.Activo ? "secondary" : "success") btn-sm"
+                                                onclick="cambiarEstado(@servicio.Id, '@servicio.Nombre', @servicio.Activo.ToString().ToLower())"
+                                                title="@(servicio.Activo ? "Desactivar" : "Activar")">
+                                            <i class="fas fa-@(servicio.Activo ? "pause" : "play")"></i>
+                                        </button>
+                                        @if (!servicio.Reservas.Any())
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    onclick="confirmarEliminar(@servicio.Id, '@servicio.Nombre')"
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Estado vacío -->
+    <div class="text-center py-5">
+        <i class="fas fa-cut fa-4x text-muted mb-3"></i>
+        <h4>No tienes servicios creados</h4>
+        <p class="text-muted mb-4">Comienza creando tu primer servicio para que los clientes puedan agendar citas contigo.</p>
+        <a asp-controller="Servicios" asp-action="Crear" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Crear Mi Primer Servicio
+        </a>
+    </div>
+}
+
+<!-- Botón volver -->
+<div class="mt-4">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+    </a>
+</div>
+
+<!-- Modal para cambiar estado -->
+<div class="modal fade" id="cambiarEstadoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Cambiar Estado del Servicio
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas <span id="accionTexto"></span> el siguiente servicio?</p>
+                <div class="alert alert-info">
+                    <strong id="servicioNombre"></strong>
+                </div>
+                <p class="text-muted small" id="advertenciaTexto"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <form id="formCambiarEstado" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-check me-2"></i>Confirmar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para eliminar -->
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Eliminar Servicio
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas <strong>eliminar permanentemente</strong> el siguiente servicio?</p>
+                <div class="alert alert-danger">
+                    <strong id="servicioEliminarNombre"></strong>
+                </div>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Esta acción no se puede deshacer. Solo puedes eliminar servicios que no tengan reservas asociadas.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <form id="formEliminar" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Eliminar Permanentemente
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function cambiarEstado(servicioId, nombre, activo) {
+            const accion = activo ? 'desactivar' : 'activar';
+            const advertencia = activo ?
+                'Los clientes no podrán agendar nuevas citas con este servicio.' :
+                'Los clientes podrán volver a agendar citas con este servicio.';
+
+            $('#servicioNombre').text(nombre);
+            $('#accionTexto').text(accion);
+            $('#advertenciaTexto').text(advertencia);
+            $('#formCambiarEstado').attr('action', '/Servicios/CambiarEstado/' + servicioId);
+            $('#cambiarEstadoModal').modal('show');
+        }
+
+        function confirmarEliminar(servicioId, nombre) {
+            $('#servicioEliminarNombre').text(nombre);
+            $('#formEliminar').attr('action', '/Servicios/Eliminar/' + servicioId);
+            $('#eliminarModal').modal('show');
+        }
+    </script>
+}

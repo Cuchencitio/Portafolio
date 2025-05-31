@@ -1,0 +1,205 @@
+﻿@model TurnitoCL.ViewModels.ServicioViewModel
+@{
+    ViewData["Title"] = "Crear Servicio";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Crear Nuevo Servicio
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Crear" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Nombre del servicio -->
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label fw-bold">
+                            <i class="fas fa-cut me-2"></i>Nombre del Servicio
+                        </label>
+                        <input asp-for="Nombre" class="form-control" placeholder="Ej: Corte Clásico, Corte + Barba, etc." />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label">
+                            <i class="fas fa-align-left me-2"></i>Descripción
+                        </label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="3"
+                                  placeholder="Describe en detalle qué incluye este servicio..."></textarea>
+                        <div class="form-text">Opcional. Ayuda a los clientes a entender qué incluye tu servicio.</div>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <!-- Precio y Duración -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Precio" class="form-label fw-bold">
+                                <i class="fas fa-dollar-sign me-2"></i>Precio
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Precio" class="form-control" type="number" min="100" step="100"
+                                       placeholder="8000" />
+                            </div>
+                            <div class="form-text">Precio en pesos chilenos</div>
+                            <span asp-validation-for="Precio" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DuracionMinutos" class="form-label fw-bold">
+                                <i class="fas fa-clock me-2"></i>Duración
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="DuracionMinutos" class="form-control" type="number" min="15" max="480" step="15" />
+                                <span class="input-group-text">minutos</span>
+                            </div>
+                            <div class="form-text">Tiempo estimado del servicio</div>
+                            <span asp-validation-for="DuracionMinutos" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Estado del servicio -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input asp-for="Activo" class="form-check-input" />
+                            <label asp-for="Activo" class="form-check-label">
+                                <strong>Servicio activo</strong>
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            Los servicios activos aparecen disponibles para que los clientes puedan agendar citas.
+                        </div>
+                    </div>
+
+                    <!-- Vista previa -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-eye me-2"></i>Vista Previa
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 id="preview-nombre">Nombre del servicio</h6>
+                                    <p id="preview-descripcion" class="text-muted mb-0">Descripción del servicio</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="h5 text-success mb-1">
+                                        $<span id="preview-precio">0</span>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i><span id="preview-duracion">0</span> min
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Crear Servicio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel lateral con información -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Consejos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-tag me-2"></i>Nombre</h6>
+                    <p class="text-muted small">
+                        Usa nombres claros y descriptivos como "Corte Clásico", "Corte + Barba", "Peinado de Fiesta".
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-dollar-sign me-2"></i>Precio</h6>
+                    <p class="text-muted small">
+                        Considera los precios de tu competencia y el valor que ofreces. Puedes usar múltiplos de $500.
+                    </p>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-clock me-2"></i>Duración</h6>
+                    <p class="text-muted small">
+                        Estima tiempo realista incluyendo preparación y limpieza. Los intervalos de 15 minutos funcionan bien.
+                    </p>
+                </div>
+
+                <div class="alert alert-info">
+                    <small>
+                        <i class="fas fa-info-circle me-2"></i>
+                        Podrás editar todos estos datos más tarde desde la gestión de servicios.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Actualizar vista previa en tiempo real
+            function actualizarVista() {
+                const nombre = $('#Nombre').val() || 'Nombre del servicio';
+                const descripcion = $('#Descripcion').val() || 'Descripción del servicio';
+                const precio = $('#Precio').val() || '0';
+                const duracion = $('#DuracionMinutos').val() || '0';
+
+                $('#preview-nombre').text(nombre);
+                $('#preview-descripcion').text(descripcion);
+                $('#preview-precio').text(parseInt(precio).toLocaleString());
+                $('#preview-duracion').text(duracion);
+            }
+
+            // Escuchar cambios en los campos
+            $('#Nombre, #Descripcion, #Precio, #DuracionMinutos').on('input', actualizarVista);
+
+            // Actualizar vista inicial
+            actualizarVista();
+
+            // Validación de precio en múltiplos de 100
+            $('#Precio').on('blur', function () {
+                const valor = parseInt($(this).val());
+                if (valor && valor % 100 !== 0) {
+                    const redondeado = Math.round(valor / 100) * 100;
+                    $(this).val(redondeado);
+                    actualizarVista();
+                }
+            });
+
+            // Validación de duración en múltiplos de 15
+            $('#DuracionMinutos').on('blur', function () {
+                const valor = parseInt($(this).val());
+                if (valor && valor % 15 !== 0) {
+                    const redondeado = Math.round(valor / 15) * 15;
+                    $(this).val(Math.max(15, redondeado)); // Mínimo 15 minutos
+                    actualizarVista();
+                }
+            });
+        });
+    </script>
+}

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TurnitoCL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a30490ba57e6c8ddffff66a755d9faa3a8874571")]
 [assembly: System.Reflection.AssemblyProductAttribute("TurnitoCL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TurnitoCL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -41,8 +41,8 @@
                                     @if (User.HasClaim("Rol", "Proveedor"))
                                     {
                                         <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard Proveedor</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cogs me-2"></i>Mis Servicios</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Disponibilidad</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Servicios" asp-action="Index"><i class="fas fa-cogs me-2"></i>Mis Servicios</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Disponibilidad" asp-action="Index"><i class="fas fa-calendar me-2"></i>Disponibilidad</a></li>
                                     }
                                     else
                                     {

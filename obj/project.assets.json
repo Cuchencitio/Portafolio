@@ -4185,23 +4185,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\cmaureira\\.nuget\\packages\\": {},
+    "C:\\Users\\cesar\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\cmaureira\\TurnitoCL\\TurnitoCL\\TurnitoCL.csproj",
+      "projectUniqueName": "C:\\Users\\cesar\\Desktop\\Turnito\\Portafolio\\TurnitoCL.csproj",
       "projectName": "TurnitoCL",
-      "projectPath": "C:\\Users\\cmaureira\\TurnitoCL\\TurnitoCL\\TurnitoCL.csproj",
-      "packagesPath": "C:\\Users\\cmaureira\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\cmaureira\\TurnitoCL\\TurnitoCL\\obj\\",
+      "projectPath": "C:\\Users\\cesar\\Desktop\\Turnito\\Portafolio\\TurnitoCL.csproj",
+      "packagesPath": "C:\\Users\\cesar\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\cesar\\Desktop\\Turnito\\Portafolio\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\cmaureira\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\cesar\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4210,8 +4210,8 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://intranetserv.sgec.cl/Web/NugetServer/nuget": {}
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
@@ -4228,8 +4228,7 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      },
-      "SdkAnalysisLevel": "9.0.300"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -4281,7 +4280,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

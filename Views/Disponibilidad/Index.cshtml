@@ -1,0 +1,604 @@
+﻿@model TurnitoCL.ViewModels.GestionDisponibilidadViewModel
+@{
+    ViewData["Title"] = "Gestión de Disponibilidad";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-calendar-alt me-2"></i>Gestión de Disponibilidad</h1>
+        <p class="text-muted">Configura tus horarios de trabajo en <strong>@Model.Proveedor.NombreNegocio</strong></p>
+    </div>
+    <div>
+        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#configuracionRapidaModal">
+            <i class="fas fa-magic me-2"></i>Configuración Rápida
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarHorarioModal">
+            <i class="fas fa-plus me-2"></i>Agregar Horario
+        </button>
+    </div>
+</div>
+
+<!-- Estadísticas de disponibilidad -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.TotalHorarios</h4>
+                        <p class="mb-0">Horarios Configurados</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.HorasSemanales.ToString("N1")h</h4>
+                        <p class="mb-0">Horas Semanales</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-week fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.HorarioMasTempranoFormateado</h4>
+                        <p class="mb-0">Inicio Más Temprano</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-sun fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>@Model.HorarioMasTardioFormateado</h4>
+                        <p class="mb-0">Fin Más Tardío</p>
+                    </div>
+                    <div>
+                        <i class="fas fa-moon fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendario semanal visual -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-calendar-week me-2"></i>Horarios de la Semana
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            @for (int dia = 0; dia <= 6; dia++)
+            {
+                var nombreDia = dia switch
+                {
+                    0 => "Domingo",
+                    1 => "Lunes",
+                    2 => "Martes",
+                    3 => "Miércoles",
+                    4 => "Jueves",
+                    5 => "Viernes",
+                    6 => "Sábado",
+                    _ => "Desconocido"
+                };
+
+                var horariosDelDia = Model.DisponibilidadesActuales.Where(d => d.DiaSemana == dia && d.Activo).ToList();
+
+                <div class="col-md-12 col-lg-6 col-xl-4 mb-3">
+                    <div class="card h-100 @(horariosDelDia.Any() ? "border-success" : "border-light")">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 text-center">
+                                <i class="fas fa-calendar-day me-2"></i>@nombreDia
+                            </h6>
+                        </div>
+                        <div class="card-body p-2">
+                            @if (horariosDelDia.Any())
+                            {
+                                @foreach (var horario in horariosDelDia.OrderBy(h => h.HoraInicio))
+                                {
+                                    <div class="d-flex justify-content-between align-items-center bg-success text-white rounded p-2 mb-2">
+                                        <small>
+                                            <i class="fas fa-clock me-1"></i>
+                                            @horario.HorarioFormateado
+                                        </small>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-light btn-sm"
+                                                    onclick="editarHorario(@horario.Id, '@horario.HoraInicio.ToString(@"hh\:mm")', '@horario.HoraFin.ToString(@"hh\:mm")', '@nombreDia')"
+                                                    title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-light btn-sm"
+                                                    onclick="cambiarEstado(@horario.Id, '@nombreDia', '@horario.HorarioFormateado')"
+                                                    title="Desactivar">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-light btn-sm"
+                                                    onclick="eliminarHorario(@horario.Id, '@nombreDia', '@horario.HorarioFormateado')"
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-3">
+                                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                                    <p class="mb-0 small">Sin horarios</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Lista detallada de horarios -->
+@if (Model.DisponibilidadesActuales.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Detalle de Horarios
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Duración</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var disponibilidad in Model.DisponibilidadesActuales.OrderBy(d => d.DiaSemana).ThenBy(d => d.HoraInicio))
+                        {
+                            <tr class="@(disponibilidad.Activo ? "" : "table-secondary")">
+                                <td>
+                                    <strong>@disponibilidad.NombreDia</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info fs-6">@disponibilidad.HorarioFormateado</span>
+                                </td>
+                                <td>
+                                    @((disponibilidad.HoraFin - disponibilidad.HoraInicio).TotalHours.ToString("N1")) horas
+                                </td>
+                                <td>
+                                    @if (disponibilidad.Activo)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-pause me-1"></i>Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <button type="button"
+                                                class="btn btn-outline-warning btn-sm"
+                                                onclick="editarHorario(@disponibilidad.Id, '@disponibilidad.HoraInicio.ToString(@"hh\:mm")', '@disponibilidad.HoraFin.ToString(@"hh\:mm")', '@disponibilidad.NombreDia')"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-outline-@(disponibilidad.Activo ? "secondary" : "success") btn-sm"
+                                                onclick="cambiarEstado(@disponibilidad.Id, '@disponibilidad.NombreDia', '@disponibilidad.HorarioFormateado')"
+                                                title="@(disponibilidad.Activo ? "Desactivar" : "Activar")">
+                                            <i class="fas fa-@(disponibilidad.Activo ? "pause" : "play")"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="eliminarHorario(@disponibilidad.Id, '@disponibilidad.NombreDia', '@disponibilidad.HorarioFormateado')"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Estado vacío -->
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+        <h4>No tienes horarios configurados</h4>
+        <p class="text-muted mb-4">Configura tus horarios de trabajo para que los clientes puedan agendar citas contigo.</p>
+        <button class="btn btn-success btn-lg me-2" data-bs-toggle="modal" data-bs-target="#configuracionRapidaModal">
+            <i class="fas fa-magic me-2"></i>Configuración Rápida
+        </button>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#agregarHorarioModal">
+            <i class="fas fa-plus me-2"></i>Agregar Primer Horario
+        </button>
+    </div>
+}
+
+<!-- Botón volver -->
+<div class="mt-4">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+    </a>
+</div>
+
+<!-- Modal para agregar horario -->
+<div class="modal fade" id="agregarHorarioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Crear" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>Agregar Horario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label asp-for="NuevaDisponibilidad.DiaSemana" class="form-label">Día de la semana</label>
+                        <select asp-for="NuevaDisponibilidad.DiaSemana" class="form-select">
+                            @foreach (var dia in Model.DiasSemana)
+                            {
+                                <option value="@dia.Value">@dia.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label asp-for="NuevaDisponibilidad.HoraInicio" class="form-label">Hora de inicio</label>
+                            <input asp-for="NuevaDisponibilidad.HoraInicio" type="time" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="NuevaDisponibilidad.HoraFin" class="form-label">Hora de fin</label>
+                            <input asp-for="NuevaDisponibilidad.HoraFin" type="time" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="form-check">
+                            <input asp-for="NuevaDisponibilidad.Activo" class="form-check-input" checked />
+                            <label asp-for="NuevaDisponibilidad.Activo" class="form-check-label">
+                                Horario activo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Horario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para configuración rápida -->
+<div class="modal fade" id="configuracionRapidaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-magic me-2"></i>Configuración Rápida de Horarios
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Configura tus horarios de trabajo de forma rápida seleccionando los días y horarios comunes.</p>
+
+                <!-- Días de la semana -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Días de trabajo</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="1" id="dia1" checked>
+                                <label class="form-check-label" for="dia1">Lunes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="2" id="dia2" checked>
+                                <label class="form-check-label" for="dia2">Martes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="3" id="dia3" checked>
+                                <label class="form-check-label" for="dia3">Miércoles</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="4" id="dia4" checked>
+                                <label class="form-check-label" for="dia4">Jueves</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="5" id="dia5" checked>
+                                <label class="form-check-label" for="dia5">Viernes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="6" id="dia6">
+                                <label class="form-check-label" for="dia6">Sábado</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input dia-semana" type="checkbox" value="0" id="dia0">
+                                <label class="form-check-label" for="dia0">Domingo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horarios predefinidos -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Horarios comunes</label>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-outline-primary w-100 horario-predefinido"
+                                    data-inicio="09:00" data-fin="18:00">
+                                Horario Comercial<br><small>9:00 - 18:00</small>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-outline-primary w-100 horario-predefinido"
+                                    data-inicio="08:00" data-fin="13:00">
+                                Media Jornada Mañana<br><small>8:00 - 13:00</small>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-outline-primary w-100 horario-predefinido"
+                                    data-inicio="14:00" data-fin="19:00">
+                                Media Jornada Tarde<br><small>14:00 - 19:00</small>
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <button type="button" class="btn btn-outline-primary w-100 horario-predefinido"
+                                    data-inicio="08:00" data-fin="20:00">
+                                Horario Extendido<br><small>8:00 - 20:00</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horarios personalizados -->
+                <div class="row">
+                    <div class="col-6">
+                        <label class="form-label">Hora de inicio</label>
+                        <input type="time" id="horaInicioRapido" class="form-control" value="09:00" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Hora de fin</label>
+                        <input type="time" id="horaFinRapido" class="form-control" value="18:00" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="crearHorariosRapido()">
+                    <i class="fas fa-magic me-2"></i>Crear Horarios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales para editar, cambiar estado y eliminar -->
+<div class="modal fade" id="editarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditar" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Horario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Editando horario del <strong id="editarDia"></strong></p>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Hora de inicio</label>
+                            <input type="time" id="editarHoraInicio" name="horaInicio" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Hora de fin</label>
+                            <input type="time" id="editarHoraFin" name="horaFin" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cambiarEstadoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cambiar Estado del Horario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Deseas cambiar el estado del horario?</p>
+                <div class="alert alert-info">
+                    <strong id="estadoDia"></strong><br>
+                    <span id="estadoHorario"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formCambiarEstado" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-warning">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Horario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas eliminar este horario?</p>
+                <div class="alert alert-danger">
+                    <strong id="eliminarDia"></strong><br>
+                    <span id="eliminarHorario"></span>
+                </div>
+                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminar" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Funciones para los modales
+        function editarHorario(id, horaInicio, horaFin, dia) {
+            $('#editarDia').text(dia);
+            $('#editarHoraInicio').val(horaInicio);
+            $('#editarHoraFin').val(horaFin);
+            $('#formEditar').attr('action', '/Disponibilidad/Editar/' + id);
+            $('#editarModal').modal('show');
+        }
+
+        function cambiarEstado(id, dia, horario) {
+            $('#estadoDia').text(dia);
+            $('#estadoHorario').text(horario);
+            $('#formCambiarEstado').attr('action', '/Disponibilidad/CambiarEstado/' + id);
+            $('#cambiarEstadoModal').modal('show');
+        }
+
+        function eliminarHorario(id, dia, horario) {
+            $('#eliminarDia').text(dia);
+            $('#eliminarHorario').text(horario);
+            $('#formEliminar').attr('action', '/Disponibilidad/Eliminar/' + id);
+            $('#eliminarModal').modal('show');
+        }
+
+        // Configuración rápida
+        $(document).ready(function () {
+            // Horarios predefinidos
+            $('.horario-predefinido').click(function () {
+                const inicio = $(this).data('inicio');
+                const fin = $(this).data('fin');
+                $('#horaInicioRapido').val(inicio);
+                $('#horaFinRapido').val(fin);
+
+                // Resaltar botón seleccionado
+                $('.horario-predefinido').removeClass('btn-primary').addClass('btn-outline-primary');
+                $(this).removeClass('btn-outline-primary').addClass('btn-primary');
+            });
+        });
+
+        function crearHorariosRapido() {
+            const diasSeleccionados = [];
+            $('.dia-semana:checked').each(function () {
+                diasSeleccionados.push(parseInt($(this).val()));
+            });
+
+            const horaInicio = $('#horaInicioRapido').val();
+            const horaFin = $('#horaFinRapido').val();
+
+            if (diasSeleccionados.length === 0) {
+                alert('Selecciona al menos un día de la semana');
+                return;
+            }
+
+            if (!horaInicio || !horaFin) {
+                alert('Selecciona las horas de inicio y fin');
+                return;
+            }
+
+            if (horaInicio >= horaFin) {
+                alert('La hora de inicio debe ser menor que la hora de fin');
+                return;
+            }
+
+            // Obtener token anti-forgery
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            // Enviar petición AJAX
+            $.ajax({
+                url: '/Disponibilidad/CrearRapido',
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: JSON.stringify({
+                    DiasSemana: diasSeleccionados,
+                    HoraInicio: horaInicio + ':00',
+                    HoraFin: horaFin + ':00'
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        $('#configuracionRapidaModal').modal('hide');
+                        alert(response.mensaje);
+                        location.reload();
+                    } else {
+                        alert(response.mensaje);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', xhr.responseText);
+                    alert('Error al crear los horarios: ' + error);
+                }
+            });
+        }
+    </script>
+}

@@ -273,69 +273,99 @@ namespace TurnitoCL.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHorasDisponibles(int proveedorId, int servicioId, DateTime fecha)
         {
-            var diaSemana = (int)fecha.DayOfWeek;
-
-            // Obtener disponibilidad del proveedor para ese día
-            var disponibilidades = await _context.DisponibilidadSemanal
-                .Where(d => d.ProveedorId == proveedorId && d.DiaSemana == diaSemana && d.Activo)
-                .ToListAsync();
-
-            if (!disponibilidades.Any())
+            try
             {
-                return Json(new List<object>());
-            }
+                _logger.LogInformation("GetHorasDisponibles llamado con proveedorId: {ProveedorId}, servicioId: {ServicioId}, fecha: {Fecha}",
+                    proveedorId, servicioId, fecha);
 
-            // Obtener duración del servicio
-            var servicio = await _context.Servicios.FindAsync(servicioId);
-            if (servicio == null)
-            {
-                return Json(new List<object>());
-            }
-
-            // Obtener reservas existentes para ese día
-            var reservasExistentes = await _context.Reservas
-                .Include(r => r.Servicio)
-                .Where(r => r.ProveedorId == proveedorId &&
-                           r.FechaHora.Date == fecha.Date &&
-                           r.Estado != EstadosReserva.Cancelada)
-                .ToListAsync();
-
-            var horasDisponibles = new List<object>();
-
-            foreach (var disponibilidad in disponibilidades)
-            {
-                var horaActual = disponibilidad.HoraInicio;
-                var horaFin = disponibilidad.HoraFin.Subtract(TimeSpan.FromMinutes(servicio.DuracionMinutos));
-
-                while (horaActual <= horaFin)
+                if (proveedorId <= 0 || servicioId <= 0)
                 {
-                    var fechaHoraCompleta = fecha.Date.Add(horaActual);
-
-                    // Verificar que sea futura
-                    if (fechaHoraCompleta > DateTime.Now)
-                    {
-                        // Verificar conflictos
-                        var finPropuesta = fechaHoraCompleta.AddMinutes(servicio.DuracionMinutos);
-
-                        var hayConflicto = reservasExistentes.Any(r =>
-                            (r.FechaHora < finPropuesta &&
-                             r.FechaHora.AddMinutes(r.Servicio.DuracionMinutos) > fechaHoraCompleta));
-
-                        if (!hayConflicto)
-                        {
-                            horasDisponibles.Add(new
-                            {
-                                valor = horaActual.ToString(@"hh\:mm"),
-                                texto = horaActual.ToString(@"HH\:mm")
-                            });
-                        }
-                    }
-
-                    horaActual = horaActual.Add(TimeSpan.FromMinutes(30)); // Intervalos de 30 minutos
+                    _logger.LogWarning("Parámetros inválidos: proveedorId={ProveedorId}, servicioId={ServicioId}", proveedorId, servicioId);
+                    return Json(new List<object>());
                 }
-            }
 
-            return Json(horasDisponibles);
+                var diaSemana = (int)fecha.DayOfWeek;
+                _logger.LogInformation("Día de la semana: {DiaSemana}", diaSemana);
+
+                // Obtener disponibilidad del proveedor para ese día
+                var disponibilidades = await _context.DisponibilidadSemanal
+                    .Where(d => d.ProveedorId == proveedorId && d.DiaSemana == diaSemana && d.Activo)
+                    .ToListAsync();
+
+                _logger.LogInformation("Disponibilidades encontradas: {Count}", disponibilidades.Count);
+
+                if (!disponibilidades.Any())
+                {
+                    _logger.LogInformation("No hay disponibilidad para el proveedor {ProveedorId} el día {DiaSemana}", proveedorId, diaSemana);
+                    return Json(new List<object>());
+                }
+
+                // Obtener duración del servicio
+                var servicio = await _context.Servicios.FindAsync(servicioId);
+                if (servicio == null)
+                {
+                    _logger.LogWarning("Servicio {ServicioId} no encontrado", servicioId);
+                    return Json(new List<object>());
+                }
+
+                _logger.LogInformation("Servicio encontrado: {Nombre}, duración: {Duracion} minutos", servicio.Nombre, servicio.DuracionMinutos);
+
+                // Obtener reservas existentes para ese día
+                var reservasExistentes = await _context.Reservas
+                    .Include(r => r.Servicio)
+                    .Where(r => r.ProveedorId == proveedorId &&
+                               r.FechaHora.Date == fecha.Date &&
+                               r.Estado != EstadosReserva.Cancelada)
+                    .ToListAsync();
+
+                _logger.LogInformation("Reservas existentes para la fecha: {Count}", reservasExistentes.Count);
+
+                var horasDisponibles = new List<object>();
+
+                foreach (var disponibilidad in disponibilidades)
+                {
+                    _logger.LogInformation("Procesando disponibilidad: {HoraInicio} - {HoraFin}", disponibilidad.HoraInicio, disponibilidad.HoraFin);
+
+                    var horaActual = disponibilidad.HoraInicio;
+                    var horaFin = disponibilidad.HoraFin.Subtract(TimeSpan.FromMinutes(servicio.DuracionMinutos));
+
+                    while (horaActual <= horaFin)
+                    {
+                        var fechaHoraCompleta = fecha.Date.Add(horaActual);
+
+                        // Verificar que sea futura
+                        if (fechaHoraCompleta > DateTime.Now)
+                        {
+                            // Verificar conflictos
+                            var finPropuesta = fechaHoraCompleta.AddMinutes(servicio.DuracionMinutos);
+
+                            var hayConflicto = reservasExistentes.Any(r =>
+                                (r.FechaHora < finPropuesta &&
+                                 r.FechaHora.AddMinutes(r.Servicio.DuracionMinutos) > fechaHoraCompleta));
+
+                            if (!hayConflicto)
+                            {
+                                horasDisponibles.Add(new
+                                {
+                                    valor = horaActual.ToString("c")[..5], // Solo HH:mm
+                                    texto = horaActual.ToString("c")[..5]  // Solo HH:mm
+                                });
+                            }
+                        }
+
+                        horaActual = horaActual.Add(TimeSpan.FromMinutes(30)); // Intervalos de 30 minutos
+                    }
+                }
+
+                _logger.LogInformation("Horas disponibles generadas: {Count}", horasDisponibles.Count);
+                return Json(horasDisponibles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en GetHorasDisponibles para proveedor {ProveedorId}, servicio {ServicioId}, fecha {Fecha}",
+                    proveedorId, servicioId, fecha);
+                return StatusCode(500, "Error interno del servidor");
+            }
         }
 
         // Métodos auxiliares
